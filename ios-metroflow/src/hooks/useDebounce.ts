@@ -22,13 +22,14 @@ export function useDebounce<T>(value: T, delay: number): T {
 /**
  * Hook to debounce a callback function
  */
-export function useDebouncedCallback<T extends (...args: unknown[]) => unknown>(
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function useDebouncedCallback<T extends (...args: any[]) => any>(
   callback: T,
   delay: number
-): T {
+): (...args: Parameters<T>) => void {
   const [timeoutId, setTimeoutId] = useState<ReturnType<typeof setTimeout> | null>(null);
 
-  const debouncedCallback = ((...args: Parameters<T>) => {
+  const debouncedCallback = (...args: Parameters<T>) => {
     if (timeoutId) {
       clearTimeout(timeoutId);
     }
@@ -38,7 +39,7 @@ export function useDebouncedCallback<T extends (...args: unknown[]) => unknown>(
     }, delay);
 
     setTimeoutId(newTimeoutId);
-  }) as T;
+  };
 
   useEffect(() => {
     return () => {

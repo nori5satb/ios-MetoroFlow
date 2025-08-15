@@ -5,6 +5,7 @@ interface BeatIndicatorProps {
   totalBeats: number;
   currentBeat: number;
   accentBeats?: number[];
+  mediumBeats?: number[];
   size?: 'small' | 'medium' | 'large';
   animated?: boolean;
 }
@@ -13,6 +14,7 @@ export const BeatIndicator: React.FC<BeatIndicatorProps> = ({
   totalBeats,
   currentBeat,
   accentBeats = [1],
+  mediumBeats = [],
   size = 'medium',
   animated = true,
 }) => {
@@ -31,6 +33,7 @@ export const BeatIndicator: React.FC<BeatIndicatorProps> = ({
   const renderBeat = (beatNumber: number) => {
     const isActive = beatNumber === currentBeat;
     const isAccent = accentBeats.includes(beatNumber);
+    const isMedium = mediumBeats.includes(beatNumber);
     
     return (
       <Animated.View
@@ -39,6 +42,7 @@ export const BeatIndicator: React.FC<BeatIndicatorProps> = ({
           styles.beat,
           styles[size],
           isAccent && styles.accentBeat,
+          isMedium && styles.mediumBeat,
           isActive && styles.activeBeat,
           isActive && animated && {
             transform: [{ scale: animatedValue }],
@@ -50,6 +54,7 @@ export const BeatIndicator: React.FC<BeatIndicatorProps> = ({
             styles.beatText,
             styles[`${size}Text`],
             isAccent && styles.accentBeatText,
+            isMedium && styles.mediumBeatText,
             isActive && styles.activeBeatText,
           ]}
         >
@@ -101,6 +106,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF3CD',
     borderColor: '#FFD60A',
   },
+  mediumBeat: {
+    backgroundColor: '#F0F0F0',
+    borderColor: '#D1D1D6',
+  },
   activeBeat: {
     backgroundColor: '#007AFF',
     borderColor: '#007AFF',
@@ -122,6 +131,9 @@ const styles = StyleSheet.create({
   },
   accentBeatText: {
     color: '#B5860B',
+  },
+  mediumBeatText: {
+    color: '#666666',
   },
   activeBeatText: {
     color: '#FFFFFF',

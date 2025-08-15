@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Card, SegmentedControl } from '../ui';
 import { TimeSignature } from '../../types';
-import { COMMON_TIME_SIGNATURES, formatTimeSignature } from '../../utils/timeSignature';
+import { TIME_SIGNATURE_PRESETS, formatTimeSignature } from '../../utils/timeSignature';
 
 interface TimeSignatureControlProps {
   timeSignature: TimeSignature;
@@ -15,20 +15,20 @@ export const TimeSignatureControl: React.FC<TimeSignatureControlProps> = ({
   onTimeSignatureChange,
   disabled = false,
 }) => {
-  const timeSignatureOptions = COMMON_TIME_SIGNATURES.map((ts) => ({
-    value: formatTimeSignature(ts),
-    label: formatTimeSignature(ts),
+  const timeSignatureOptions = TIME_SIGNATURE_PRESETS.map((preset) => ({
+    value: formatTimeSignature(preset.timeSignature),
+    label: formatTimeSignature(preset.timeSignature),
   }));
 
   const handleSelectionChange = (value: string) => {
-    const selectedTimeSignature = COMMON_TIME_SIGNATURES.find(
-      (ts) => formatTimeSignature(ts) === value
+    const selectedPreset = TIME_SIGNATURE_PRESETS.find(
+      (preset) => formatTimeSignature(preset.timeSignature) === value
     );
     
-    if (selectedTimeSignature) {
+    if (selectedPreset) {
       onTimeSignatureChange(
-        selectedTimeSignature.numerator,
-        selectedTimeSignature.denominator
+        selectedPreset.timeSignature.numerator,
+        selectedPreset.timeSignature.denominator
       );
     }
   };

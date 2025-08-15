@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Card, BeatIndicator, CircularProgress } from '../ui';
 import { PlayButton } from './PlayButton';
 import { TimeSignature } from '../../types';
+import { getTimeSignatureInfo } from '../../utils/timeSignature';
 
 interface MetronomeDisplayProps {
   isPlaying: boolean;
@@ -12,7 +13,6 @@ interface MetronomeDisplayProps {
   timeSignature: TimeSignature;
   onPlayToggle: () => void;
   loading?: boolean;
-  accentBeats?: number[];
 }
 
 export const MetronomeDisplay: React.FC<MetronomeDisplayProps> = ({
@@ -23,8 +23,10 @@ export const MetronomeDisplay: React.FC<MetronomeDisplayProps> = ({
   timeSignature,
   onPlayToggle,
   loading = false,
-  accentBeats = [1],
 }) => {
+  // Get time signature information with beat patterns
+  const timeSignatureInfo = getTimeSignatureInfo(timeSignature);
+  
   // Calculate progress within current beat cycle
   const beatProgress = currentBeat > 0 ? (currentBeat - 1) / timeSignature.numerator : 0;
 
@@ -41,7 +43,8 @@ export const MetronomeDisplay: React.FC<MetronomeDisplayProps> = ({
         <BeatIndicator
           totalBeats={timeSignature.numerator}
           currentBeat={currentBeat}
-          accentBeats={accentBeats}
+          accentBeats={timeSignatureInfo.strongBeats}
+          mediumBeats={timeSignatureInfo.mediumBeats}
           size="large"
           animated={isPlaying}
         />
