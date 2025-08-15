@@ -2,6 +2,7 @@ import React from 'react';
 import { ScrollView, StyleSheet, SafeAreaView } from 'react-native';
 import { AdvancedBpmControl } from '../../src/components/metronome/AdvancedBpmControl';
 import { AdvancedTimeSignatureControl } from '../../src/components/metronome/AdvancedTimeSignatureControl';
+import { PlaybackControls } from '../../src/components/metronome/PlaybackControls';
 import { VolumeControl } from '../../src/components/metronome/VolumeControl';
 import { SoundSelector } from '../../src/components/metronome/SoundSelector';
 import { MetronomeDisplay } from '../../src/components/metronome/MetronomeDisplay';
@@ -21,7 +22,6 @@ export default function HomeScreen() {
     setTimeSignature,
     setVolume,
     setClickSound,
-    togglePlayback,
   } = useMetronome();
 
   return (
@@ -38,8 +38,11 @@ export default function HomeScreen() {
           currentBar={currentBar}
           bpm={bpm}
           timeSignature={timeSignature}
-          onPlayToggle={togglePlayback}
+          onPlayToggle={() => {}} // PlaybackControlsで制御
         />
+        
+        {/* 再生制御 */}
+        <PlaybackControls />
         
         {/* BPMコントロール */}
         <AdvancedBpmControl

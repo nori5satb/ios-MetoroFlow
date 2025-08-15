@@ -1,6 +1,7 @@
 import { audioEngine } from './AudioEngine';
 import { useMetronomeStore } from '../../stores/metronomeStore';
 import { useAppSettingsStore } from '../../stores/appSettingsStore';
+import { getTimeSignatureInfo } from '../../utils/timeSignature';
 
 export interface MetronomeEngineOptions {
   onBeat?: (beat: number, bar: number) => void;
@@ -19,6 +20,9 @@ class MetronomeEngine {
   private isCountingIn = false;
   private countInBeatsRemaining = 0;
   private options: MetronomeEngineOptions = {};
+  private isPaused = false;
+  private pausedAt = 0;
+  private pausedBeatPosition = 0;
 
   /**
    * Initialize the metronome engine
@@ -91,6 +95,9 @@ class MetronomeEngine {
     this.currentBar = 0;
     this.isCountingIn = false;
     this.countInBeatsRemaining = 0;
+    this.isPaused = false;
+    this.pausedAt = 0;
+    this.pausedBeatPosition = 0;
 
     // Update store state
     useMetronomeStore.getState().stopPlayback();
@@ -100,11 +107,55 @@ class MetronomeEngine {
   }
 
   /**
-   * Toggle play/stop
+   * Pause the metronome (preserves position)
+   */
+  pause(): void {
+    if (this.intervalId && !this.isPaused) {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+      this.isPaused = true;
+      this.pausedAt = Date.now() / 1000;
+      this.pausedBeatPosition = this.currentBeat;
+      
+      // Update store state
+      useMetronomeStore.getState().stopPlayback();
+      
+      // Trigger callback
+      this.options.onStop?.();
+    }
+  }
+
+  /**
+   * Resume the metronome from paused position
+   */
+  async resume(): Promise<void> {
+    if (this.isPaused) {
+      const pauseDuration = (Date.now() / 1000) - this.pausedAt;
+      this.nextBeatTime += pauseDuration;
+      this.startTime += pauseDuration;
+      this.isPaused = false;
+      
+      // Restart the scheduler
+      this.intervalId = setInterval(() => {
+        this.scheduler();
+      }, this.schedulerIntervalMs);
+
+      // Update store state
+      useMetronomeStore.getState().startPlayback();
+      
+      // Trigger callback
+      this.options.onStart?.();
+    }
+  }
+
+  /**
+   * Toggle play/pause/stop
    */
   async toggle(options: MetronomeEngineOptions = {}): Promise<void> {
     if (this.intervalId) {
-      this.stop();
+      this.pause();
+    } else if (this.isPaused) {
+      await this.resume();
     } else {
       await this.start(options);
     }
@@ -131,20 +182,25 @@ class MetronomeEngine {
     const state = useMetronomeStore.getState();
     const delay = Math.max(0, this.nextBeatTime - Date.now() / 1000) * 1000;
 
-    // Determine if this is an accented beat
+    // Get musical beat emphasis based on time signature
+    const timeSignatureInfo = getTimeSignatureInfo(state.timeSignature);
     const beatNumber = (this.currentBeat % state.timeSignature.numerator) + 1;
-    const isAccent = state.accentBeats.includes(beatNumber) || beatNumber === 1;
+    
+    // Determine beat emphasis level
+    const isStrongBeat = timeSignatureInfo.strongBeats.includes(beatNumber);
+    const isMediumBeat = timeSignatureInfo.mediumBeats.includes(beatNumber);
+    const isAccent = isStrongBeat || (isMediumBeat && beatNumber !== 1);
     
     // Play the beat after the calculated delay
     setTimeout(() => {
-      this.playBeat(isAccent);
+      this.playBeat(isAccent, isStrongBeat ? 'strong' : isMediumBeat ? 'medium' : 'weak');
     }, delay);
   }
 
   /**
    * Play a single beat
    */
-  private async playBeat(isAccent: boolean): Promise<void> {
+  private async playBeat(isAccent: boolean, _emphasis: 'strong' | 'medium' | 'weak' = 'weak'): Promise<void> {
     const state = useMetronomeStore.getState();
     const settings = useAppSettingsStore.getState();
 
@@ -237,6 +293,32 @@ class MetronomeEngine {
    */
   isPlaying(): boolean {
     return this.intervalId !== null;
+  }
+
+  /**
+   * Check if the metronome is paused
+   */
+  isPausedState(): boolean {
+    return this.isPaused;
+  }
+
+  /**
+   * Get current playback state
+   */
+  getPlaybackState(): {
+    isPlaying: boolean;
+    isPaused: boolean;
+    currentBeat: number;
+    currentBar: number;
+    isCountingIn: boolean;
+  } {
+    return {
+      isPlaying: this.intervalId !== null,
+      isPaused: this.isPaused,
+      currentBeat: this.currentBeat,
+      currentBar: this.currentBar,
+      isCountingIn: this.isCountingIn,
+    };
   }
 
   /**
