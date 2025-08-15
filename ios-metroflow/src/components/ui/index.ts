@@ -4,4 +4,4 @@ export { Slider } from './Slider';
 export { Switch } from './Switch';
 export { SegmentedControl } from './SegmentedControl';
 export { BeatIndicator } from './BeatIndicator';
-export { CircularProgress } from './CircularProgress';
+export { CircularProgress } from './CircularProgressSimple';
