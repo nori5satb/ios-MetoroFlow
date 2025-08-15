@@ -1,15 +1,18 @@
 {
   "expo": {
-    "name": "ios-metroflow",
+    "name": "MetroFlow",
     "slug": "ios-metroflow",
     "version": "1.0.0",
     "orientation": "portrait",
+    "description": "A professional metronome and sequencer app for musicians",
     "icon": "./assets/images/icon.png",
     "scheme": "iosmetroflow",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.metroflow.app",
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
