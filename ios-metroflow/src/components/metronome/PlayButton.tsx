@@ -1,11 +1,13 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 interface PlayButtonProps {
   isPlaying: boolean;
   onPress: () => void;
   loading?: boolean;
   disabled?: boolean;
+  size?: 'small' | 'medium' | 'large';
 }
 
 export const PlayButton: React.FC<PlayButtonProps> = ({
@@ -13,11 +15,20 @@ export const PlayButton: React.FC<PlayButtonProps> = ({
   onPress,
   loading = false,
   disabled = false,
+  size = 'large',
 }) => {
+  const buttonSize = size === 'small' ? 60 : size === 'medium' ? 80 : 120;
+  const iconSize = size === 'small' ? 24 : size === 'medium' ? 32 : 48;
+
   return (
     <TouchableOpacity
       style={[
         styles.button,
+        {
+          width: buttonSize,
+          height: buttonSize,
+          borderRadius: buttonSize / 2,
+        },
         isPlaying ? styles.stopButton : styles.playButton,
         disabled && styles.disabled,
       ]}
@@ -26,9 +37,14 @@ export const PlayButton: React.FC<PlayButtonProps> = ({
       activeOpacity={0.8}
     >
       {loading ? (
-        <ActivityIndicator color="#FFFFFF" />
+        <ActivityIndicator color="#FFFFFF" size="large" />
       ) : (
-        <Text style={styles.buttonText}>{isPlaying ? 'STOP' : 'PLAY'}</Text>
+        <Ionicons
+          name={isPlaying ? 'stop' : 'play'}
+          size={iconSize}
+          color="#FFFFFF"
+          style={!isPlaying && styles.playIcon}
+        />
       )}
     </TouchableOpacity>
   );
@@ -36,9 +52,6 @@ export const PlayButton: React.FC<PlayButtonProps> = ({
 
 const styles = StyleSheet.create({
   button: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
@@ -51,17 +64,15 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   playButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#34C759',
   },
   stopButton: {
-    backgroundColor: '#F44336',
+    backgroundColor: '#FF3B30',
   },
   disabled: {
     opacity: 0.5,
   },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 24,
-    fontWeight: 'bold',
+  playIcon: {
+    marginLeft: 4, // Slight offset to center the play icon visually
   },
 });

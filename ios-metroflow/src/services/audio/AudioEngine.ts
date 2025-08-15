@@ -53,25 +53,27 @@ class AudioEngine {
 
       // For now, using placeholder paths - will be replaced with actual sound files
       // In production, these would load actual audio files
-      const soundPaths = this.getSoundPaths(soundType);
+      // const soundPaths = this.getSoundPaths(soundType);
 
-      // Load high sound
-      if (soundPaths.high) {
-        const { sound: highSound } = await Audio.Sound.createAsync(
-          soundPaths.high,
-          { shouldPlay: false, volume: this.currentVolume }
-        );
-        soundSet.high = highSound;
-      }
+      // Load high sound (placeholder for now)
+      // In production, this would load actual sound files
+      // if (soundPaths.high) {
+      //   const { sound: highSound } = await Audio.Sound.createAsync(
+      //     soundPaths.high,
+      //     { shouldPlay: false, volume: this.currentVolume }
+      //   );
+      //   soundSet.high = highSound;
+      // }
 
-      // Load low sound
-      if (soundPaths.low) {
-        const { sound: lowSound } = await Audio.Sound.createAsync(
-          soundPaths.low,
-          { shouldPlay: false, volume: this.currentVolume }
-        );
-        soundSet.low = lowSound;
-      }
+      // Load low sound (placeholder for now)
+      // In production, this would load actual sound files
+      // if (soundPaths.low) {
+      //   const { sound: lowSound } = await Audio.Sound.createAsync(
+      //     soundPaths.low,
+      //     { shouldPlay: false, volume: this.currentVolume }
+      //   );
+      //   soundSet.low = lowSound;
+      // }
 
       // Unload previous sounds if they exist
       const existingSounds = this.sounds.get(soundType);

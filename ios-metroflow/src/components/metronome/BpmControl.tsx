@@ -1,70 +1,56 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import Slider from '@react-native-community/slider';
+import { Text, StyleSheet } from 'react-native';
+import { Card, Slider } from '../ui';
 import { MIN_BPM, MAX_BPM, formatBpm } from '../../utils/tempo';
 
 interface BpmControlProps {
   bpm: number;
   onBpmChange: (bpm: number) => void;
+  onSlidingComplete?: (bpm: number) => void;
   disabled?: boolean;
 }
 
 export const BpmControl: React.FC<BpmControlProps> = ({
   bpm,
   onBpmChange,
+  onSlidingComplete,
   disabled = false,
 }) => {
   return (
-    <View style={styles.container}>
+    <Card style={styles.container}>
       <Text style={styles.label}>BPM</Text>
       <Text style={styles.value}>{formatBpm(bpm)}</Text>
+      
       <Slider
-        style={styles.slider}
+        value={bpm}
         minimumValue={MIN_BPM}
         maximumValue={MAX_BPM}
-        value={bpm}
         onValueChange={onBpmChange}
+        onSlidingComplete={onSlidingComplete}
+        step={1}
         disabled={disabled}
-        minimumTrackTintColor="#007AFF"
-        maximumTrackTintColor="#C7C7CC"
-        thumbTintColor="#007AFF"
+        formatValue={formatBpm}
+        showValue={false}
       />
-      <View style={styles.limits}>
-        <Text style={styles.limitText}>{MIN_BPM}</Text>
-        <Text style={styles.limitText}>{MAX_BPM}</Text>
-      </View>
-    </View>
+    </Card>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    alignItems: 'center',
   },
   label: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 10,
+    color: '#8E8E93',
+    marginBottom: 8,
   },
   value: {
-    fontSize: 48,
+    fontSize: 64,
     fontWeight: 'bold',
     color: '#007AFF',
-    textAlign: 'center',
     marginBottom: 20,
-  },
-  slider: {
-    width: '100%',
-    height: 40,
-  },
-  limits: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 5,
-  },
-  limitText: {
-    fontSize: 12,
-    color: '#999',
+    fontVariant: ['tabular-nums'],
   },
 });
