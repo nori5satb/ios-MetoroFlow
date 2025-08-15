@@ -1,5 +1,6 @@
 import { Audio } from 'expo-av';
 import { Sound } from 'expo-av/build/Audio';
+import { beepGenerator } from './BeepGenerator';
 
 export type SoundType = 'wood' | 'digital' | 'bell' | 'tick';
 export type BeatType = 'high' | 'low';
@@ -26,6 +27,9 @@ class AudioEngine {
     if (this.isInitialized) return;
 
     try {
+      // Initialize beep generator for immediate audio feedback
+      await beepGenerator.initialize();
+
       // Configure audio mode for iOS
       await Audio.setAudioModeAsync({
         ...this.audioMode,
@@ -34,7 +38,7 @@ class AudioEngine {
         interruptionModeAndroid: 1, // InterruptionModeAndroid.DoNotMix
       });
 
-      // Preload default sounds
+      // Preload default sounds (placeholder for now)
       await this.loadSoundSet('wood');
       
       this.isInitialized = true;
@@ -129,29 +133,46 @@ class AudioEngine {
       await this.initialize();
     }
 
+    const effectiveVolume = volume ?? this.currentVolume;
+
+    // Try to play loaded sound files first
     const soundSet = this.sounds.get(soundType);
-    if (!soundSet) {
-      await this.loadSoundSet(soundType);
-      return this.playBeat(soundType, beatType, volume);
-    }
-
-    const sound = beatType === 'high' ? soundSet.high : soundSet.low;
-    if (!sound) {
-      // No sound loaded - fail silently
-      return;
-    }
-
-    try {
-      // Set volume if specified
-      if (volume !== undefined) {
-        await sound.setVolumeAsync(volume);
+    if (soundSet) {
+      const sound = beatType === 'high' ? soundSet.high : soundSet.low;
+      if (sound) {
+        try {
+          // Set volume if specified
+          await sound.setVolumeAsync(effectiveVolume);
+          // Replay from start
+          await sound.setPositionAsync(0);
+          await sound.playAsync();
+          return;
+        } catch (error) {
+          console.error('Failed to play loaded sound:', error);
+        }
       }
+    }
 
-      // Replay from start
-      await sound.setPositionAsync(0);
-      await sound.playAsync();
+    // Fallback to beep generator for immediate audio feedback
+    try {
+      const beepTone = beatType === 'high' ? 'high' : 'low';
+      const duration = this.getBeatDuration(soundType);
+      await beepGenerator.playBeep(beepTone, effectiveVolume, duration);
     } catch (error) {
-      console.error('Failed to play beat:', error);
+      console.error('Failed to play beep:', error);
+    }
+  }
+
+  /**
+   * Get beat duration based on sound type
+   */
+  private getBeatDuration(soundType: SoundType): number {
+    switch (soundType) {
+      case 'wood': return 150;
+      case 'digital': return 100;
+      case 'bell': return 200;
+      case 'tick': return 80;
+      default: return 120;
     }
   }
 
@@ -191,6 +212,10 @@ class AudioEngine {
       await this.unloadSoundSet(soundSet);
     }
     this.sounds.clear();
+    
+    // Cleanup beep generator
+    await beepGenerator.cleanup();
+    
     this.isInitialized = false;
   }
 
