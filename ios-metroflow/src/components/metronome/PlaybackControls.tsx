@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Card, Switch } from '../ui';
 import { PlayButton } from './PlayButton';
@@ -98,17 +98,17 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     }
   }, [isPlaying, countIn, countInBars, timeSignature, disabled, onPlaybackStateChange, performCountdown]);
 
-  // Handle keyboard shortcuts
+  // Handle keyboard shortcuts (Web only)
   useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
-      if (event.code === 'Space') {
-        event.preventDefault();
-        handlePlayToggle();
-      }
-    };
-
     // Only add listener on web platforms
-    if (typeof window !== 'undefined') {
+    if (Platform.OS === 'web' && typeof window !== 'undefined' && window.addEventListener) {
+      const handleKeyPress = (event: KeyboardEvent) => {
+        if (event.code === 'Space') {
+          event.preventDefault();
+          handlePlayToggle();
+        }
+      };
+
       window.addEventListener('keydown', handleKeyPress);
       return () => window.removeEventListener('keydown', handleKeyPress);
     }
@@ -229,8 +229,8 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
         )}
       </View>
 
-      {/* Keyboard Shortcut Hint */}
-      {typeof window !== 'undefined' && (
+      {/* Keyboard Shortcut Hint (Web only) */}
+      {Platform.OS === 'web' && (
         <View style={styles.shortcutHint}>
           <Ionicons name="keypad" size={16} color="#8E8E93" />
           <Text style={styles.shortcutText}>Press Space to play/stop</Text>
